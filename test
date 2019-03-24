@@ -1,0 +1,89 @@
+p = document.add_paragraph('Table ', style='Caption')
+Table(p)
+p.add_run(': Commercial Long-run DR per Rating Band and Test Scores')
+p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+t = document.add_table(table_to_write.shape[0]+3, table_to_write.shape[1])
+t.autofit = True
+t.style = 'Table Grid'
+t.alignment = WD_ALIGN_PARAGRAPH.CENTER
+table_cells = t._cells
+
+# write the table to Word
+# header row
+table_cells[0].paragraphs[0].add_run('MS').bold = True
+table_cells[0].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+t.cell(0, 0).merge(t.cell(1, 0))
+format_cell_background(table_cells[0], '#0070C0')
+
+table_cells[1].paragraphs[0].add_run('Admissible PD').bold = True
+table_cells[1].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+t.cell(0, 1).merge(t.cell(0, 2))
+format_cell_background(table_cells[1], '#0070C0')
+
+table_cells[table_to_write.shape[-1]+1].paragraphs[0].add_run('>Min').bold = True
+table_cells[table_to_write.shape[-1]+1].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+format_cell_background(table_cells[table_to_write.shape[-1]+1], '#0070C0')
+
+table_cells[table_to_write.shape[-1]+2].paragraphs[0].add_run('<=Max').bold = True
+table_cells[table_to_write.shape[-1]+2].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+format_cell_background(table_cells[table_to_write.shape[-1]+2], '#0070C0')
+
+table_cells[3].paragraphs[0].add_run('13 Yr Avg DR').bold = True
+table_cells[3].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+t.cell(0, 3).merge(t.cell(1, 3))
+format_cell_background(table_cells[3], '#0070C0')
+
+table_cells[4].paragraphs[0].add_run('Monotonicity').bold = True
+table_cells[4].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+t.cell(0, 4).merge(t.cell(0, 5))
+format_cell_background(table_cells[4], '#0070C0')
+
+table_cells[table_to_write.shape[-1]+4].paragraphs[0].add_run('Breach').bold = True
+table_cells[table_to_write.shape[-1]+4].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+format_cell_background(table_cells[table_to_write.shape[-1]+4], '#0070C0')
+
+table_cells[table_to_write.shape[-1]+5].paragraphs[0].add_run('Score').bold = True
+table_cells[table_to_write.shape[-1]+5].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+format_cell_background(table_cells[table_to_write.shape[-1]+5], '#0070C0')
+
+table_cells[6].paragraphs[0].add_run('Historical DR Score').bold = True
+table_cells[6].paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+t.cell(0, 6).merge(t.cell(1, 6))
+format_cell_background(table_cells[6], '#0070C0')
+
+for i in range(table_to_write.shape[0]):
+    for j in range(table_to_write.shape[-1]):
+        if j == 0:  # MS ratings
+            table_cells[(i+2)*table_to_write.shape[-1]+j].text = str(table_to_write.values[i,j])
+            table_cells[(i+2)*table_to_write.shape[-1]+j].paragraphs[0].runs[0].font.bold = True
+            format_cell_background(table_cells[(i+2)*table_to_write.shape[-1]+j], '#F2F2F2')
+        elif j in [1,2]:  # add % signs to the DRs
+            if str(table_to_write.values[i,j]) != '':
+                table_cells[(i+2)*table_to_write.shape[-1]+j].text = str(table_to_write.values[i,j]) + '%'
+        elif j == 3:  # add % signs to the DRs and grey out
+            table_cells[(i+2)*table_to_write.shape[-1]+j].text = str(table_to_write.values[i,j]) + '%'
+            format_cell_background(table_cells[(i+2)*table_to_write.shape[-1]+j], '#D9D9D9')
+        else:
+            table_cells[(i+2)*table_to_write.shape[-1]+j].text = str(table_to_write.values[i,j])
+
+t.cell(table_to_write.shape[0]+2, 0).paragraphs[0].add_run('Aggregate').bold = True
+t.cell(table_to_write.shape[0]+2, 0).merge(t.cell(table_to_write.shape[0]+2, 1))
+t.cell(table_to_write.shape[0]+2, 0).merge(t.cell(table_to_write.shape[0]+2, 2))
+t.cell(table_to_write.shape[0]+2, 0).merge(t.cell(table_to_write.shape[0]+2, 3))
+t.cell(table_to_write.shape[0]+2, 0).merge(t.cell(table_to_write.shape[0]+2, 4))
+format_cell_background(t.cell(table_to_write.shape[0]+2, 0), '#F2F2F2')
+t.cell(table_to_write.shape[0]+2, 5).text = str(round(table_to_write['MONOTONICITY_SCORE'].mean(), 2))
+t.cell(table_to_write.shape[0]+2, 6).text = str(round(table_to_write['HISTORICAL_DR_SCORE'].mean(), 2))
+# t.cell(table_to_write.shape[0]+2, 5).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+# t.cell(table_to_write.shape[0]+2, 6).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+# format space after paragraph and alignments
+for j in range((table_to_write.shape[0]+3)*table_to_write.shape[1]):
+    table_cells[j].paragraphs[0].paragraph_format.space_before = Pt(0)
+    table_cells[j].paragraphs[0].paragraph_format.space_after = Pt(0)
+    table_cells[j].paragraphs[0].paragraph_format.line_spacing = 1
+    table_cells[j].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+    table_cells[j].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    if table_cells[j].text == 'Aggregate':
+        table_cells[j].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT
